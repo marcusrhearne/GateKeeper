@@ -1,55 +1,94 @@
 pragma solidity ^0.4.13; 
 
 contract SmartDevice{
-    address owner; //sets the device owner
-    address intermediaryContract; //could be marketplace, oracle etc. 
+    address deviceOwner;
+    address intermediaryContract;
     
-    
-    struct Opener{
-        //For rental type locks
-        uint startTime; //blocktime or epoch ?
-        uint endTime; 
-        
-        uint value;  // value per lock in Wei
-        bool exists; //fucking key value bs
+    struct KeyRing{
+        address keyholder;
+        BaseKey[] keys;
+    }
+
+    struct BaseKey{
+        // Keys which are neither timed keys or metered keys are permanent.
+        bool isTimedKey;
+        uint startTime;
+        uint endTime;
+
+        bool isMeteredKey;
+        uint usagesRemaining;
     }
     
-    bool allowIntermediary; //determined by constructor or change by admin
-    event OpenLock(address opener); 
-    mapping (address => bool) permOpeners; 
-    mapping (address => Opener) openers; 
-    uint256 fwUpdate; //points to hash of latest FWUpdate  on IPFS 
+    event OnLockOpened(address opener); 
     
+    mapping (address => KeyRing) keyRings;
     
     modifier isAdmin{
-        require((msg.sender == owner) || (msg.sender == intermediaryContract)); 
+        require((msg.sender == deviceOwner) || (msg.sender == intermediaryContract)); 
         _;
     }
-    
-    function createRental (uint start, uint end,  uint avalue, address rentee) isAdmin{
-        openers[rentee] = Opener({startTime: start, endTime: end, value: avalue, exists: true}); 
-        
+
+    function InitializeKeyRing(address keyHolder, KeyRing keyring){
+        if(keyring.keyholder == address(0x0))
+        {
+            keyring.keyholder = keyHolder;
+        }
     }
-    
-    function createPerm (address keyholder) isAdmin{
-        permOpeners[keyholder] = true; 
+
+    function CreateKey (address keyHolder) isAdmin
+    {
+        KeyRing keyring = keyRings[address];
+        InitializeKeyRing(keyHolder, keyring);
+        BaseKey newKey = BaseKey(
+            {
+                isTimedKey : false,
+                isMeteredKey : false
+            }
+        )
+        keyring.keys.push(newKey);
     }
-    
-  
-    function addIntermediary (address intermediaryAddr) isAdmin{
+
+    function CreateKey (address keyHolder, uint usages) isAdmin
+    {
+        KeyRing keyring = keyRings[address];
+        InitializeKeyRing(keyHolder, keyring);
+        BaseKey newKey = BaseKey(
+            {
+                isTimedKey : false,
+                isMeteredKey : true,
+                usagesRemaining : usages
+            }
+        )
+        keyring.keys.push(newKey);
+    }
+
+    function CreateKey (address keyHolder, uint start, uint end) isAdmin
+    {
+        KeyRing keyring = keyRings[address];
+        InitializeKeyRing(keyHolder, keyring);
+        BaseKey newKey = BaseKey(
+            {
+                isTimedKey : true,
+                startTime : start,
+                endTime : end,
+                isMeteredKey : false
+            }
+        )
+        keyring.keys.push(newKey);
+    }
+
+    function AddIntermediary (address intermediaryAddr) isAdmin{
         if(allowIntermediary == true){
             intermediaryContract = intermediaryAddr; 
         }
     }
     
-      function openLock(){
-       if (permOpeners[msg.sender] == true){
-            OpenLock(msg.sender); //Lock will wait for event to be fired
-       }
-       else if (openers[msg.sender].exists != false){
-           OpenLock(msg.sender); //possibly leaky logic
-           
-       }
+    function OpenLock() returns(bool successful){
+        KeyRing keyRing = keyRings[msg.sender];
+        if(keyring.keyholder == address(0x0))){
+            return false;
+        }
+        // implement iterable mapping for keyring
     }
     
 }
