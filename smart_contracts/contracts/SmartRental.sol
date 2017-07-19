@@ -1,4 +1,4 @@
-pragma solidity ^0.4.13; 
+pragma solidity ^0.4.8; 
 
 contract SmartDevice{
     address owner; //sets the device owner

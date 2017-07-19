@@ -42,8 +42,27 @@
       "links": {},
       "address": "0x5c60fbe9732a083a02287ec513b0a4c9c50bf302",
       "updated_at": 1500332556574
+    },
+    "1500406961790": {
+      "events": {
+        "0x97c6e861ff0487a7773ec09353653841a0f77be7fc0d3051c6eaabf4e95f2f91": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "beaconState",
+              "type": "bool"
+            }
+          ],
+          "name": "beaconSwitched",
+          "type": "event"
+        }
+      },
+      "links": {},
+      "address": "0xd404591b5a7581187aec23da038fc0cfdee09606",
+      "updated_at": 1500407043097
     }
   },
   "schema_version": "0.0.5",
-  "updated_at": 1500332556574
+  "updated_at": 1500407043097
 }
