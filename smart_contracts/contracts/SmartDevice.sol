@@ -1,4 +1,4 @@
-pragma solidity ^0.4.13; 
+pragma solidity ^0.4.11; 
 
 contract SmartDevice{
     address deviceOwner;
@@ -23,72 +23,76 @@ contract SmartDevice{
     
     mapping (address => KeyRing) keyRings;
     
-    modifier isAdmin{
-        require((msg.sender == deviceOwner) || (msg.sender == intermediaryContract)); 
+    modifier isAdmin(){
+        require(msg.sender == deviceOwner || msg.sender == intermediaryContract); 
         _;
-    }
-
-    function InitializeKeyRing(address keyHolder, KeyRing keyring){
-        if(keyring.keyholder == address(0x0))
-        {
-            keyring.keyholder = keyHolder;
-        }
     }
 
     function CreateKey (address keyHolder) isAdmin
     {
-        KeyRing keyring = keyRings[address];
-        InitializeKeyRing(keyHolder, keyring);
-        BaseKey newKey = BaseKey(
+        KeyRing keyring = keyRings[keyHolder];
+        if(keyring.keyholder == address(0x0))
+        {
+            keyring.keyholder = keyHolder;
+        }
+        var newKey = BaseKey(
             {
                 isTimedKey : false,
-                isMeteredKey : false
+                startTime : 0,
+                endTime : 0,
+                isMeteredKey : false,
+                usagesRemaining : 0
             }
-        )
+        );
         keyring.keys.push(newKey);
     }
 
     function CreateKey (address keyHolder, uint usages) isAdmin
     {
-        KeyRing keyring = keyRings[address];
-        InitializeKeyRing(keyHolder, keyring);
-        BaseKey newKey = BaseKey(
+        KeyRing keyring = keyRings[keyHolder];
+        if(keyring.keyholder == address(0x0))
+        {
+            keyring.keyholder = keyHolder;
+        }
+        var newKey = BaseKey(
             {
                 isTimedKey : false,
+                startTime : 0,
+                endTime : 0,
                 isMeteredKey : true,
                 usagesRemaining : usages
             }
-        )
+        );
         keyring.keys.push(newKey);
     }
 
     function CreateKey (address keyHolder, uint start, uint end) isAdmin
     {
-        KeyRing keyring = keyRings[address];
-        InitializeKeyRing(keyHolder, keyring);
-        BaseKey newKey = BaseKey(
+        KeyRing keyring = keyRings[keyHolder];
+        if(keyring.keyholder == address(0x0))
+        {
+            keyring.keyholder = keyHolder;
+        }
+        var newKey = BaseKey(
             {
                 isTimedKey : true,
                 startTime : start,
                 endTime : end,
-                isMeteredKey : false
+                isMeteredKey : false,
+                usagesRemaining : 0
             }
-        )
+        );
         keyring.keys.push(newKey);
     }
 
     function AddIntermediary (address intermediaryAddr) isAdmin{
-        if(allowIntermediary == true){
+        if(intermediaryContract != address(0x0)){
             intermediaryContract = intermediaryAddr; 
         }
     }
     
-    function OpenLock() returns(bool successful){
-        KeyRing keyRing = keyRings[msg.sender];
-        if(keyring.keyholder == address(0x0))){
-            return false;
-        }
-        // implement iterable mapping for keyring
+    function VerifyKeyExists(string message) returns(bool authorized){
+        
     }
     
 }
