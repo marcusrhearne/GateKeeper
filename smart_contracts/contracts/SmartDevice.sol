@@ -1,4 +1,4 @@
-pragma solidity ^ 0.4 .11;
+pragma solidity ^ 0.4.11;
 import "../../node_modules/zeppelin-solidity/contracts/ownership/Ownable.sol";
 
 contract SmartDevice is Ownable
